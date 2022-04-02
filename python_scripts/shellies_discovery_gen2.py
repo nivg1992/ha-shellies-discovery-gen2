@@ -159,13 +159,13 @@ TPL_MQTT_CONNECTED = (
 TPL_POWER = "{{value_json.apower|round(1)}}"
 TPL_POWER_FACTOR = "{{value_json.pf*100|round}}"
 TPL_RELAY_OVERPOWER = (
-    "{%if ^overpower^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
+    "{%if ^overpower^ in value_json.errors%}ON{%else%}OFF{%endif%}"
 )
 TPL_RELAY_OVERTEMP = (
-    "{%if ^overtemp^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
+    "{%if ^overtemp^ in value_json.errors%}ON{%else%}OFF{%endif%}"
 )
 TPL_RELAY_OVERVOLTAGE = (
-    "{%if ^overvoltage^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
+    "{%if ^overvoltage^ in value_json.errors%}ON{%else%}OFF{%endif%}"
 )
 TPL_TEMPERATURE = "{{value_json.temperature.tC|round(1)}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.result.sys.uptime)|timestamp_local}}"
@@ -748,7 +748,7 @@ def get_cover(cover_id, profile):
         KEY_POSITION_TOPIC: TOPIC_COVER.format(cover=cover_id),
         KEY_STATE_TOPIC: TOPIC_COVER.format(cover=cover_id),
         KEY_VALUE_TEMPLATE: "{%if value_json.state!=^calibrating^%}{{value_json.state}}{%endif%}",
-        KEY_POSITION_TEMPLATE: "{%if is_number(value_json.get(^current_pos^))%}{{value_json.current_pos}}{%endif%}",
+        KEY_POSITION_TEMPLATE: "{%if is_number(value_json.current_pos)%}{{value_json.current_pos}}{%endif%}",
         KEY_SET_POSITION_TOPIC: TOPIC_RPC,
         KEY_SET_POSITION_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.GoToPosition^,^params^:{{^id^:{cover_id},^pos^:{{{{position}}}}}}}}",
         KEY_PAYLOAD_OPEN: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.Open^,^params^:{{^id^:{cover_id}}}}}",

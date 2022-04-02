@@ -5,6 +5,9 @@ import datetime
 import json
 from mqtt import connect_mqtt
 import yaml
+import schedule
+import time
+import _thread
 
 from RestrictedPython import (
     compile_restricted_exec,
@@ -28,7 +31,7 @@ mqtt_host = os.getenv('MQTT_HOST', '192.168.17.250')
 mqtt_port = int(os.getenv('MQTT_PORT', 1883))
 mqtt_user = os.getenv('MQTT_USER', 'emqx')
 mqtt_password = os.getenv('MQTT_PASSWORD', 'public')
-
+global_client = None
 class CallMock():
     def __init__(self, client):
         self.client = client
@@ -106,29 +109,61 @@ def on_announce(client, userdata, msg):
     logger.info("MQTT Receive: {}, {}".format(msg.topic,msg.payload.decode()))
     data = json.loads(msg.payload.decode())
     filename = './python_scripts/shellies_discovery_gen2.py'
+    if 'device' in data['result']['sys']:
+        with open(filename, encoding="utf8") as fil:
+            source = fil.read()
 
-    with open(filename, encoding="utf8") as fil:
-        source = fil.read()
-
-    execute(filename, source, {
-        "id": data['src'],
-        "device_config": data['result'],
-        "discovery_prefix": 'shelly'
-    })
+        execute(filename, source, {
+            "id": data['src'],
+            "device_config": data['result'],
+            "discovery_prefix": 'shelly'
+        })
 
 def on_connect(client, userdata, flags, rc):
+    global global_client
+    global_client = client
     hassMock.initClient(client)
     client.message_callback_add('shellies_discovery/rpc', on_announce)
     client.subscribe('shellies_discovery/rpc')
+    request_config()
+    request_status()
+
+def request_config():
+    global global_client
+    if global_client == None: return
+    logger.info('Request Config')
     with open("devices.yaml", "r") as stream:
         try:
             devices = yaml.safe_load(stream)
             for device in devices:
-                client.publish('{}/rpc'.format(device), json.dumps({'id': 1, 'src':'shellies_discovery', 'method':'Shelly.GetConfig'}))
+                global_client.publish('{}/rpc'.format(device), json.dumps({'id': 1, 'src':'shellies_discovery', 'method':'Shelly.GetConfig'}))
             
         except yaml.YAMLError as exc:
             print(exc)
-    
 
+def request_status():
+    global global_client
+    if global_client == None: return
+    logger.info('Request Status')
+    with open("devices.yaml", "r") as stream:
+        try:
+            devices = yaml.safe_load(stream)
+            for device in devices:
+                global_client.publish('{}/rpc'.format(device), json.dumps({'id': 1, 'src':'shellies_discovery', 'method':'Shelly.GetStatus'}))
+            
+        except yaml.YAMLError as exc:
+            print(exc)
 
-connect_mqtt('ha-shellies-discovery-gen2', mqtt_user, mqtt_password, mqtt_host, on_connect, mqtt_port).loop_forever()
+def schedule_loop():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+schedule.every(15).minutes.do(request_status)
+
+try:
+    schedule_thread = _thread.start_new_thread(schedule_loop, ())
+except Exception as e:
+    logger.error("Error: unable to start thread", e)
+
+connect_mqtt('ha-shellies-discovery-gen2', mqtt_user, mqtt_password, mqtt_host, on_connect, mqtt_port, False)
