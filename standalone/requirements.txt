@@ -3,3 +3,4 @@ flake8==4.0.1
 pre-commit==2.16.0
 paho-mqtt==1.6.1
 RestrictedPython==5.2
+schedule==1.1.0
