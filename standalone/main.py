@@ -31,6 +31,7 @@ mqtt_host = os.getenv('MQTT_HOST', '192.168.17.250')
 mqtt_port = int(os.getenv('MQTT_PORT', 1883))
 mqtt_user = os.getenv('MQTT_USER', 'emqx')
 mqtt_password = os.getenv('MQTT_PASSWORD', 'public')
+nqtt_discovery_prefix = os.getenv('MQTT_DISCOVERY_PREFIX', 'shelly')
 global_client = None
 class CallMock():
     def __init__(self, client):
@@ -116,7 +117,7 @@ def on_announce(client, userdata, msg):
         execute(filename, source, {
             "id": data['src'],
             "device_config": data['result'],
-            "discovery_prefix": 'shelly'
+            "discovery_prefix": nqtt_discovery_prefix
         })
 
 def on_connect(client, userdata, flags, rc):
