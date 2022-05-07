@@ -150,7 +150,7 @@ def request_status():
         try:
             devices = yaml.safe_load(stream)
             for device in devices:
-                global_client.publish('{}/rpc'.format(device), json.dumps({'id': 1, 'src':'shellies_discovery', 'method':'Shelly.GetStatus'}))
+                global_client.publish('{}/rpc'.format(device), json.dumps({'id': 1, 'src':'{}/status'.format(device), 'method':'Shelly.GetStatus'}))
             
         except yaml.YAMLError as exc:
             print(exc)

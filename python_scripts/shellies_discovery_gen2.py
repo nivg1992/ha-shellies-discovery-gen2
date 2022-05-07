@@ -154,7 +154,7 @@ TPL_FIRMWARE_STABLE_ATTRS = (
 )
 TPL_INPUT = "{%if value_json.state%}ON{%else%}OFF{%endif%}"
 TPL_MQTT_CONNECTED = (
-    "{%if value_json.result.mqtt.connected%}online{%else%}offline{%endif%}"
+    "{%if value_json.result.connected%}online{%else%}offline{%endif%}"
 )
 TPL_POWER = "{{value_json.apower|round(1)}}"
 TPL_POWER_FACTOR = "{{value_json.pf*100|round}}"
