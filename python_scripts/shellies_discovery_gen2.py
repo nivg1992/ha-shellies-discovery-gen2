@@ -158,12 +158,8 @@ TPL_MQTT_CONNECTED = (
 )
 TPL_POWER = "{{value_json.apower|round(1)}}"
 TPL_POWER_FACTOR = "{{value_json.pf*100|round}}"
-TPL_RELAY_OVERPOWER = (
-    "{%if ^overpower^ in value_json.errors%}ON{%else%}OFF{%endif%}"
-)
-TPL_RELAY_OVERTEMP = (
-    "{%if ^overtemp^ in value_json.errors%}ON{%else%}OFF{%endif%}"
-)
+TPL_RELAY_OVERPOWER = "{%if ^overpower^ in value_json.errors%}ON{%else%}OFF{%endif%}"
+TPL_RELAY_OVERTEMP = "{%if ^overtemp^ in value_json.errors%}ON{%else%}OFF{%endif%}"
 TPL_RELAY_OVERVOLTAGE = (
     "{%if ^overvoltage^ in value_json.errors%}ON{%else%}OFF{%endif%}"
 )
